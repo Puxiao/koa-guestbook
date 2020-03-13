@@ -1,6 +1,6 @@
-#Koa - GuestBook
+# Koa - GuestBook
 
-##简介
+## 简介
 
 使用Koa开发的一个访客留言板程序。
 
@@ -13,7 +13,7 @@
 - mysql：Nodejs对应mysql
 
 
-##数据库
+## 数据库
 实际数据库使用腾讯云mySQL。
 
 数据库字段结构为：
@@ -28,7 +28,7 @@
 - ip：类型varchar、长度15、不可为空
 
 
-##配置
+## 配置
 
 http端口配置、数据库连接配置对应文件为：/config/config.js
 你需要将相关配置修改为自己的。
