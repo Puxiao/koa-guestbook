@@ -11,6 +11,7 @@
 - koa-router：Koa路由
 - art-template：服务器生成模板网页
 - mysql：Nodejs对应mysql
+- input-value：常规字符检查(我自己发布的npm包)
 
 
 ## 数据库
