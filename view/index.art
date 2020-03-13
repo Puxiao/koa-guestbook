@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>留言墙</title>
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+        }
+        body{
+            max-width: 600px;
+            margin: 0 auto;
+            font-size: 16px;
+            font-family: 'Microsoft Yahei', 'PingFang SC', 'Avenir', 'Segoe UI', 'Hiragino Sans GB', STHeiti, 'Microsoft Sans Serif', 'WenQuanYi Micro Hei', sans-serif;
+        }
+
+        h1{
+            margin: 30px 0 0 0;
+            font-size: 32px;
+            text-align: center;
+            color: #333;
+        }
+
+        h2{
+            margin: 30px 0 10px;
+            font-size: 20px;
+            color: #333;
+        }
+
+        hr{
+            margin: 0 0 16px 0;
+        }
+
+        .send-mes-form{
+            margin: 8px 0 0 0;
+        }
+
+        .send-mes-form input{
+            width: 500px;
+            height: 28px;
+            font-size: 16px;
+            padding: 0 0 0 6px;
+            margin: 6px 0;
+        }
+
+        .send-mes-form input[type='radio']{
+            display: inline-block;
+            margin: 6px 4px 10px 0px;
+            width: 16px;
+            height: 16px;
+        }
+
+        .send-mes-form .label-radio{
+            display: inline-block;
+            margin: 0 8px 0 0;
+        }
+
+        .send-mes-form textarea{
+            display: inline-block;
+            margin: 6px 0 0 80px;
+            padding: 4px 0 0 6px;
+            width: 500px;
+            height: 100px;
+            font-size: 16px;
+            font-family: 'Microsoft Yahei', 'PingFang SC', 'Avenir', 'Segoe UI', 'Hiragino Sans GB', STHeiti, 'Microsoft Sans Serif', 'WenQuanYi Micro Hei', sans-serif;
+        }
+
+        .send-mes-form input[type='button']{
+            margin: 6px 0 6px 80px;
+            width: 508px;
+            height: 34px;
+        }
+
+        .mes-list li{
+            margin: 10px 20px;
+        }
+
+        .mes-list li span[class='user-public']{
+            font-size: 18px;
+            font-weight: bold;
+            color: seagreen;
+        }
+
+        .mes-list li span[class='user-guest']{
+            font-size: 18px;
+            font-weight: bold;
+            color: royalblue;
+        }
+
+        .mes-list li span[class='contact']{
+            font-size: 18px;
+            color: seagreen;
+        }
+
+        .mes-list li span[class='time']{
+            margin: 0 0 0 6px;
+            font-size: 14px;
+            color: #888;
+        }
+
+        .mes-list li span[class='title']{
+            display: inline-block;
+            margin: 10px 20px 4px;
+            font-size: 18px;
+            color: #222;
+        }
+
+        .mes-list li span[class='detail']{
+            display: inline-block;
+            margin: 0 20px 4px;
+            font-size: 16px;
+            color: #555;
+        }
+
+    </style>
+    <script>
+        function doSubmit(){
+            let mes_form = document.querySelector('.send-mes-form');
+            let subBt = mes_form.querySelector('#subBt');
+            subBt.setAttribute('disabled',true);
+
+            let time  = Date.now();
+            let send_mes = `state=${mes_form.state.value}&user=${mes_form.user.value}&tel=${mes_form.tel.value}&title=${mes_form.title.value}&detail=${mes_form.detail.value}`;
+
+            let xhr = new XMLHttpRequest();
+            xhr.open('POST','/addmes',true);
+            xhr.setRequestHeader('Content-type','application/x-www-form-urlencoded');
+            xhr.send(send_mes);
+            xhr.onreadystatechange = () =>{
+                if(xhr.readyState === 4){
+                    if(xhr.status === 200){
+                        let result_data = JSON.parse(xhr.responseText);
+                        if(result_data.state == 1){
+                            alert('提交成功');
+                            location.reload(true);
+                        }else{
+                            alert('发生错误，提交失败');
+                            subBt.removeAttribute('disabled');
+                        }
+                    }else{
+                        alert('提交失败，请稍后重试');
+                        subBt.removeAttribute('disabled');
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>留言墙</h1>
+    <h2>我要留言</h2>
+    <hr>
+    <form class="send-mes-form">
+        <label>留言类型：</label>
+        <label class="label-radio"><input name="state" type="radio" value="1" checked>公开</label>
+        <label class="label-radio"><input name="state" type="radio" value="2">匿名(不公开留言人信息)</label>
+        <label class="label-radio"><input name="state" type="radio" value="3">私信(仅管理员可见)</label><br>
+        <label>您的称呼：<input type="text" name="user" placeholder="请输入姓名或昵称" required max="10" autocomplete="off"></label><br>
+        <label>联系手机：<input type="text" name="tel" placeholder="请输入手机号(可不填写)" max="11" autocomplete="off"></label><br>
+        <label>留言标题：<input type="text" name="title" placeholder="请输入留言标题(限50字以内)" required max="50" autocomplete="off"></label><br>
+        <textarea name="detail" placeholder="请输入留言内容(限300字以内)" required maxlength="300"></textarea><br>
+        <input type="button" id="subBt" onClick="doSubmit();" value="提交">
+    </form>
+    <h2>留言列表</h2>
+    <hr>
+    <ul class="mes-list">
+        {{if list.length}}
+        {{each list}}
+            <li>
+                {{if $value.state === 1}}
+                <span class="user-public">{{$value.user}}</span>
+                {{if $value.tel}}<span class="contact">({{$value.tel}})</span>{{/if}}
+                {{else if $value.state === 2}}
+                <span class="user-guest">匿名用户</span>
+                {{/if}}
+                <span class="time">{{$value.time}}</span><br>
+                <span class="title">{{$value.title}}</span><br>
+                <span class="detail">{{$value.detail}}</span>
+            </li>
+        {{/each}}
+    {{else}}
+        <span>读取数据为空...</span>
+    {{/if}}
+    </ul>
+</body>
+</html>
